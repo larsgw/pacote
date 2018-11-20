@@ -22,6 +22,6 @@ test('acknowledges git option', t => {
   return git._exec(['--version'], null, {
     git: systemNode
   }).spread(stdout => {
-    t.equals(stdout, process.version + '\n')
+    t.equals(stdout.trim(), process.version)
   })
 })
