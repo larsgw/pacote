@@ -418,6 +418,33 @@ test('optionally annotates manifest with request-related metadata', t => {
   })
 })
 
+test('transforms http references to default registry to https in manifest', t => {
+  const srv = tnock(t, 'https://registry.npmjs.org')
+
+  srv.get('/foo').reply(200, {
+    name: 'foo',
+    'dist-tags': { latest: '1.0.0' },
+    versions: {
+      '1.0.0': {
+        name: 'foo',
+        version: '1.0.0',
+        _hasShrinkwrap: false,
+        _integrity: 'sha1-deadbeef',
+        _shasum: '75e69d6de79f',
+        _resolved: 'http://registry.npmjs.org/foo/-/foo-1.0.0.tgz',
+        dist: {
+          integrity: 'sha1-deadbeef',
+          shasum: '75e69d6de79f',
+          tarball: 'http://registry.npmjs.org/foo/-/foo-1.0.0.tgz'
+        }
+      }
+    }
+  })
+  return manifest('foo@1.0.0', { registry: 'https://registry.npmjs.org' }).then(pkg => {
+    t.deepEqual(pkg._resolved, 'https://registry.npmjs.org/foo/-/foo-1.0.0.tgz', '_resolved was transformed')
+  })
+})
+
 test('sends npm-session header if passed in opts', t => {
   const SESSION_ID = 'deadbeef'
   const opts = {
